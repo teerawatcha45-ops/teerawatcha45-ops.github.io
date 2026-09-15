@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinCalc Pro - แผนกวิชาการบัญชี วท.ลพบุรี</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-16">
+
+    <!-- Top App Bar -->
+    <header class="bg-blue-700 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center font-bold text-xl">📊</div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight">FinCalc Pro</h1>
+                    <p class="text-xs text-blue-100">แผนกวิชาการบัญชี วท.ลพบุรี</p>
+                </div>
+            </div>
+            <span class="text-xs bg-blue-800 border border-blue-400/30 px-2 py-1 rounded">ปวช. 2567</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+
+        <!-- Module Selection Tabs -->
+        <div class="flex space-x-2 overflow-x-auto pb-1 scrollbar-none text-sm">
+            <button onclick="switchModule('interest')" id="btn-tab-interest" class="mod-tab px-4 py-2 rounded-full font-medium whitespace-nowrap bg-blue-700 text-white shadow-sm">
+                1. ดอกเบี้ย
+            </button>
+            <button onclick="switchModule('tvm')" id="btn-tab-tvm" class="mod-tab px-4 py-2 rounded-full font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200">
+                2. มูลค่าเงิน (TVM)
+            </button>
+            <button onclick="switchModule('npv')" id="btn-tab-npv" class="mod-tab px-4 py-2 rounded-full font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200">
+                3. NPV (10 ปี)
+            </button>
+            <button onclick="switchModule('irr')" id="btn-tab-irr" class="mod-tab px-4 py-2 rounded-full font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200">
+                4. IRR (10 ปี)
+            </button>
+        </div>
+
+        <!-- Mode Toggle (Calculator vs Quiz) -->
+        <div class="bg-slate-200 p-1 rounded-xl flex text-xs font-semibold">
+            <button onclick="switchMode('calc')" id="subtab-calc" class="w-1/2 py-2 rounded-lg bg-white text-blue-700 shadow-sm transition-all">
+                เครื่องมือคำนวณ & แสดงวิธีทำ
+            </button>
+            <button onclick="switchMode('quiz')" id="subtab-quiz" class="w-1/2 py-2 rounded-lg text-slate-600 transition-all">
+                คลังโจทย์ฝึกทักษะ (5 ข้อ)
+            </button>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODULE 1: ดอกเบี้ยเชิงเดียว & ทบต้น -->
+        <!-- ================================================================= -->
+        <div id="module-interest" class="module-block space-y-4">
+            <!-- Mode 1: Calc -->
+            <div id="interest-calc" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="font-bold text-slate-800 text-base border-b pb-2">คำนวณดอกเบี้ย (Interest Calculator)</h2>
+                <div>
+                    <label class="text-xs font-semibold text-slate-600">ประเภทดอกเบี้ย</label>
+                    <select id="interest-type" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                        <option value="simple">ดอกเบี้ยเชิงเดียว (Simple Interest)</option>
+                        <option value="compound">ดอกเบี้ยทบต้น (Compound Interest - รายปี)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">เงินต้น (P: บาท)</label>
+                        <input type="number" id="int-p" placeholder="เช่น 10000" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">อัตราดอกเบี้ยต่อปี (r: %)</label>
+                        <input type="number" id="int-r" placeholder="เช่น 5" step="0.01" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-600">ระยะเวลา (t หรือ n: ปี)</label>
+                    <input type="number" id="int-t" placeholder="เช่น 3" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                </div>
+                <button onclick="calculateInterest()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+                    คำนวณผลลัพธ์
+                </button>
+                <div id="interest-result" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-2 text-sm">
+                    <p class="font-semibold text-blue-900" id="int-res-title"></p>
+                    <div class="text-xs text-slate-700 bg-white p-2.5 rounded border border-blue-100 font-mono leading-relaxed" id="int-res-steps"></div>
+                    <div class="flex justify-between font-bold text-base text-blue-900 pt-1 border-t border-blue-200">
+                        <span>เงินรวมสุทธิ (A หรือ FV):</span>
+                        <span id="int-res-total">0.00 บาท</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode 2: Quiz -->
+            <div id="interest-quiz" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h2 class="font-bold text-slate-800 text-sm">แบบฝึกทักษะ: ดอกเบี้ย</h2>
+                    <span id="quiz-interest-progress" class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">ข้อที่ 1/5</span>
+                </div>
+                <div id="quiz-interest-question" class="p-3.5 bg-slate-50 rounded-xl text-sm leading-relaxed text-slate-700 font-normal"></div>
+                <div id="quiz-interest-interactive" class="space-y-2"></div>
+                <div id="quiz-interest-feedback" class="hidden p-3 rounded-lg text-xs font-medium"></div>
+                <div class="flex justify-between items-center pt-2 border-t text-xs">
+                    <button onclick="prevQuestion('interest')" class="px-3 py-1.5 border rounded-lg hover:bg-slate-50 text-slate-600">◀ ข้อก่อนหน้า</button>
+                    <span id="quiz-interest-score" class="font-semibold text-slate-500">คะแนน: 0/5</span>
+                    <button onclick="nextQuestion('interest')" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">ข้อถัดไป ▶</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODULE 2: มูลค่าเงินตามกาลเวลา (TVM) -->
+        <!-- ================================================================= -->
+        <div id="module-tvm" class="module-block hidden space-y-4">
+            <!-- Mode 1: Calc -->
+            <div id="tvm-calc" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="font-bold text-slate-800 text-base border-b pb-2">คำนวณมูลค่าเงินตามกาลเวลา (TVM)</h2>
+                <div>
+                    <label class="text-xs font-semibold text-slate-600">ต้องการหาค่าอะไร?</label>
+                    <select id="tvm-target" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50" onchange="toggleTVMInputs()">
+                        <option value="pv">หามูลค่าปัจจุบัน (Present Value: PV)</option>
+                        <option value="fv">หามูลค่าอนาคต (Future Value: FV)</option>
+                    </select>
+                </div>
+                <div id="tvm-input-fv-block">
+                    <label class="text-xs font-semibold text-slate-600">มูลค่าอนาคตที่ต้องการ (FV: บาท)</label>
+                    <input type="number" id="tvm-fv" placeholder="เช่น 200000" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                </div>
+                <div id="tvm-input-pv-block" class="hidden">
+                    <label class="text-xs font-semibold text-slate-600">มูลค่าปัจจุบันเริ่มต้น (PV: บาท)</label>
+                    <input type="number" id="tvm-pv" placeholder="เช่น 100000" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">อัตราคิดลด/ดอกเบี้ย (r: %)</label>
+                        <input type="number" id="tvm-r" placeholder="เช่น 8" step="0.01" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">จำนวนปี (n: ปี)</label>
+                        <input type="number" id="tvm-n" placeholder="เช่น 5" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                </div>
+                <button onclick="calculateTVM()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+                    คำนวณค่า TVM
+                </button>
+                <div id="tvm-result" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-2 text-sm">
+                    <p class="font-semibold text-blue-900" id="tvm-res-title"></p>
+                    <div class="text-xs text-slate-700 bg-white p-2.5 rounded border border-blue-100 font-mono leading-relaxed" id="tvm-res-steps"></div>
+                    <div class="flex justify-between font-bold text-base text-blue-900 pt-1 border-t border-blue-200">
+                        <span id="tvm-res-label">ผลลัพธ์:</span>
+                        <span id="tvm-res-value">0.00 บาท</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode 2: Quiz -->
+            <div id="tvm-quiz" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h2 class="font-bold text-slate-800 text-sm">แบบฝึกทักษะ: TVM</h2>
+                    <span id="quiz-tvm-progress" class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">ข้อที่ 1/5</span>
+                </div>
+                <div id="quiz-tvm-question" class="p-3.5 bg-slate-50 rounded-xl text-sm leading-relaxed text-slate-700 font-normal"></div>
+                <div id="quiz-tvm-interactive" class="space-y-2"></div>
+                <div id="quiz-tvm-feedback" class="hidden p-3 rounded-lg text-xs font-medium"></div>
+                <div class="flex justify-between items-center pt-2 border-t text-xs">
+                    <button onclick="prevQuestion('tvm')" class="px-3 py-1.5 border rounded-lg hover:bg-slate-50 text-slate-600">◀ ข้อก่อนหน้า</button>
+                    <span id="quiz-tvm-score" class="font-semibold text-slate-500">คะแนน: 0/5</span>
+                    <button onclick="nextQuestion('tvm')" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">ข้อถัดไป ▶</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODULE 3: มูลค่าปัจจุบันสุทธิ (NPV - รองรับ 10 ปี) -->
+        <!-- ================================================================= -->
+        <div id="module-npv" class="module-block hidden space-y-4">
+            <!-- Mode 1: Calc -->
+            <div id="npv-calc" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="font-bold text-slate-800 text-base border-b pb-2">คำนวณ NPV (กระแสเงินสดสูงสุด 10 ปี)</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">เงินลงทุนเริ่มแรก (CF₀: บาท)</label>
+                        <input type="number" id="npv-cf0" placeholder="เช่น 100000" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">อัตราคิดลด (k: %)</label>
+                        <input type="number" id="npv-k" placeholder="เช่น 10" step="0.1" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-semibold text-slate-600">กระแสเงินสดรับรายปี (ปีที่ 1 ถึง 10)</label>
+                        <span class="text-[10px] text-slate-400">*ปีไหนไม่มีให้เว้นว่างไว้</span>
+                    </div>
+                    <!-- 10 Years Grid -->
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <input type="number" id="npv-cf-1" placeholder="ปีที่ 1" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-2" placeholder="ปีที่ 2" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-3" placeholder="ปีที่ 3" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-4" placeholder="ปีที่ 4" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-5" placeholder="ปีที่ 5" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-6" placeholder="ปีที่ 6" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-7" placeholder="ปีที่ 7" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-8" placeholder="ปีที่ 8" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-9" placeholder="ปีที่ 9" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="npv-cf-10" placeholder="ปีที่ 10" class="p-2 border rounded-lg bg-slate-50">
+                    </div>
+                </div>
+
+                <button onclick="calculateNPV()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+                    คำนวณ NPV และประเมินโครงการ
+                </button>
+
+                <div id="npv-result" class="hidden mt-4 p-4 rounded-xl space-y-2 text-sm">
+                    <div class="flex justify-between font-bold text-base">
+                        <span>ค่า NPV สุทธิ:</span>
+                        <span id="npv-res-value">0.00 บาท</span>
+                    </div>
+                    <div class="text-xs space-y-1 bg-white/70 p-2.5 rounded font-mono max-h-36 overflow-y-auto" id="npv-res-steps"></div>
+                    <div class="p-2 rounded font-semibold text-xs text-center" id="npv-res-decision"></div>
+                </div>
+            </div>
+
+            <!-- Mode 2: Quiz -->
+            <div id="npv-quiz" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h2 class="font-bold text-slate-800 text-sm">แบบฝึกทักษะ: การประเมิน NPV</h2>
+                    <span id="quiz-npv-progress" class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">ข้อที่ 1/5</span>
+                </div>
+                <div id="quiz-npv-question" class="p-3.5 bg-slate-50 rounded-xl text-sm leading-relaxed text-slate-700 font-normal"></div>
+                <div id="quiz-npv-interactive" class="space-y-2"></div>
+                <div id="quiz-npv-feedback" class="hidden p-3 rounded-lg text-xs font-medium"></div>
+                <div class="flex justify-between items-center pt-2 border-t text-xs">
+                    <button onclick="prevQuestion('npv')" class="px-3 py-1.5 border rounded-lg hover:bg-slate-50 text-slate-600">◀ ข้อก่อนหน้า</button>
+                    <span id="quiz-npv-score" class="font-semibold text-slate-500">คะแนน: 0/5</span>
+                    <button onclick="nextQuestion('npv')" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">ข้อถัดไป ▶</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODULE 4: อัตราผลตอบแทนภายใน (IRR - รองรับ 10 ปี) -->
+        <!-- ================================================================= -->
+        <div id="module-irr" class="module-block hidden space-y-4">
+            <!-- Mode 1: Calc -->
+            <div id="irr-calc" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="font-bold text-slate-800 text-base border-b pb-2">คำนวณ IRR (กระแสเงินสดสูงสุด 10 ปี)</h2>
+                <div>
+                    <label class="text-xs font-semibold text-slate-600">เงินลงทุนเริ่มแรก (CF₀: บาท)</label>
+                    <input type="number" id="irr-cf0" placeholder="เช่น 100000" class="w-full mt-1 p-2 border rounded-lg text-sm bg-slate-50">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-semibold text-slate-600">เงินสดรับรายปี (ปีที่ 1 ถึง 10)</label>
+                        <span class="text-[10px] text-slate-400">*ปีไหนไม่มีให้เว้นว่างไว้</span>
+                    </div>
+                    <!-- 10 Years Grid -->
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <input type="number" id="irr-cf-1" placeholder="ปีที่ 1" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-2" placeholder="ปีที่ 2" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-3" placeholder="ปีที่ 3" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-4" placeholder="ปีที่ 4" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-5" placeholder="ปีที่ 5" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-6" placeholder="ปีที่ 6" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-7" placeholder="ปีที่ 7" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-8" placeholder="ปีที่ 8" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-9" placeholder="ปีที่ 9" class="p-2 border rounded-lg bg-slate-50">
+                        <input type="number" id="irr-cf-10" placeholder="ปีที่ 10" class="p-2 border rounded-lg bg-slate-50">
+                    </div>
+                </div>
+
+                <button onclick="calculateIRR()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+                    คำนวณอัตราผลตอบแทน IRR
+                </button>
+
+                <div id="irr-result" class="hidden mt-4 p-4 bg-purple-50 border border-purple-200 rounded-xl space-y-2 text-sm">
+                    <div class="flex justify-between font-bold text-base text-purple-900">
+                        <span>ค่า IRR ที่คำนวณได้:</span>
+                        <span id="irr-res-value">0.00 %</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed" id="irr-res-desc">
+                        *IRR คืออัตราคิดลดที่ทำให้มูลค่าปัจจุบันสุทธิ (NPV) มีค่าเท่ากับ 0 พอดี
+                    </p>
+                </div>
+            </div>
+
+            <!-- Mode 2: Quiz -->
+            <div id="irr-quiz" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h2 class="font-bold text-slate-800 text-sm">แบบฝึกทักษะ: กฎการตัดสินใจ IRR</h2>
+                    <span id="quiz-irr-progress" class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">ข้อที่ 1/5</span>
+                </div>
+                <div id="quiz-irr-question" class="p-3.5 bg-slate-50 rounded-xl text-sm leading-relaxed text-slate-700 font-normal"></div>
+                <div id="quiz-irr-interactive" class="space-y-2"></div>
+                <div id="quiz-irr-feedback" class="hidden p-3 rounded-lg text-xs font-medium"></div>
+                <div class="flex justify-between items-center pt-2 border-t text-xs">
+                    <button onclick="prevQuestion('irr')" class="px-3 py-1.5 border rounded-lg hover:bg-slate-50 text-slate-600">◀ ข้อก่อนหน้า</button>
+                    <span id="quiz-irr-score" class="font-semibold text-slate-500">คะแนน: 0/5</span>
+                    <button onclick="nextQuestion('irr')" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">ข้อถัดไป ▶</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- App Logic Script -->
+    <script>
+        let currentModule = 'interest';
+        let currentSubMode = 'calc';
+
+        // ================= Question Bank (5 Questions each) =================
+        const questionBank = {
+            interest: [
+                {
+                    q: "ข้อที่ 1: กู้ยืมเงินจำนวน 50,000 บาท อัตราดอกเบี้ย 6% ต่อปี เป็นเวลา 2 ปี แบบดอกเบี้ยเชิงเดียว จงคำนวณหาจำนวน <u>ดอกเบี้ยจ่ายทั้งหมด</u>",
+                    type: "input",
+                    ans: 6000,
+                    exp: "สูตร I = P × r × t = 50,000 × 0.06 × 2 = 6,000 บาท"
+                },
+                {
+                    q: "ข้อที่ 2: ฝากเงิน 20,000 บาท อัตราดอกเบี้ยเชิงเดียว 3% ต่อปี เป็นเวลา 4 ปี เมื่อครบกำหนดจะได้รับ <u>เงินรวมทั้งหมด (เงินต้น+ดอกเบี้ย)</u> กี่บาท?",
+                    type: "input",
+                    ans: 22400,
+                    exp: "I = 20,000 × 0.03 × 4 = 2,400 บาท | เงินรวม = 20,000 + 2,400 = 22,400 บาท"
+                },
+                {
+                    q: "ข้อที่ 3: ฝากเงิน 10,000 บาท อัตราดอกเบี้ยทบต้น 5% ต่อปี คิดดอกเบี้ยทบต้นปีละครั้ง เมื่อสิ้นสุดปีที่ 2 จะมี <u>เงินรวม</u> เท่าใด?",
+                    type: "input",
+                    ans: 11025,
+                    exp: "FV = PV(1+r)ⁿ = 10,000 × (1.05)² = 11,025 บาท"
+                },
+                {
+                    q: "ข้อที่ 4: การคำนวณดอกเบี้ยแบบใดที่นำดอกเบี้ยที่เกิดขึ้นในแต่ละงวดไปรวมเป็นเงินต้นเพื่อคิดดอกเบี้ยในงวดถัดไป?",
+                    type: "choice",
+                    choices: ["ดอกเบี้ยเชิงเดียว (Simple Interest)", "ดอกเบี้ยทบต้น (Compound Interest)", "อัตราคิดลดทางการค้า", "ดอกเบี้ยคงที่"],
+                    ansIndex: 1,
+                    exp: "ดอกเบี้ยทบต้น (Compound Interest) จะนำดอกเบี้ยงวดก่อนมาทบเป็นเงินต้นงวดถัดไป"
+                },
+                {
+                    q: "ข้อที่ 5: กู้เงิน 100,000 บาท ดอกเบี้ยเชิงเดียว 8% ต่อปี เป็นเวลา 6 เดือน (0.5 ปี) จะต้องจ่ายดอกเบี้ยเท่าใด?",
+                    type: "input",
+                    ans: 4000,
+                    exp: "สูตร I = 100,000 × 0.08 × 0.5 = 4,000 บาท"
+                }
+            ],
+            tvm: [
+                {
+                    q: "ข้อที่ 1: อีก 3 ปีข้างหน้า ต้องการใช้เงิน 133,100 บาท หากอัตราผลตอบแทนคือ 10% ต่อปี ในวันนี้ต้องฝากเงินไว้เท่าใด (หาค่า PV)?",
+                    type: "input",
+                    ans: 100000,
+                    exp: "PV = FV ÷ (1+r)ⁿ = 133,100 ÷ (1.10)³ = 100,000 บาท"
+                },
+                {
+                    q: "ข้อที่ 2: นำเงิน 50,000 บาท ไปลงทุนได้ผลตอบแทน 8% ต่อปี เมื่อเวลาผ่านไป 2 ปี เงินก้อนนี้จะมีมูลค่าอนาคต (FV) เท่าใด?",
+                    type: "input",
+                    ans: 58320,
+                    exp: "FV = PV × (1+r)ⁿ = 50,000 × (1.08)² = 58,320 บาท"
+                },
+                {
+                    q: "ข้อที่ 3: หากอัตราคิดลด (Discount Rate) มีค่าสูงขึ้นเรื่อย ๆ มูลค่าปัจจุบัน (Present Value) ของเงินสดรับในอนาคตจะมีทิศทางอย่างไร?",
+                    type: "choice",
+                    choices: ["มีมูลค่าเพิ่มขึ้น", "มีมูลค่าลดลง", "มีมูลค่าคงที่เสมอ", "ไม่แน่นอน"],
+                    ansIndex: 1,
+                    exp: "อัตราคิดลดเป็นตัวหาร ยิ่งอัตราคิดลดสูงขึ้น ค่า PV จะยิ่งลดลง"
+                },
+                {
+                    q: "ข้อที่ 4: ต้องการมีเงิน 242,000 บาทในอีก 2 ปีข้างหน้า โดยอัตราคิดลดเท่ากับ 10% ต่อปี มูลค่าปัจจุบัน (PV) คือข้อใด?",
+                    type: "input",
+                    ans: 200000,
+                    exp: "PV = 242,000 ÷ (1.10)² = 200,000 บาท"
+                },
+                {
+                    q: "ข้อที่ 5: หลักการ 'เงิน 1 บาทในวันนี้ มีค่ามากกว่าเงิน 1 บาทในอนาคต' มีสาเหตุสำคัญมาจากปัจจัยใดมากที่สุด?",
+                    type: "choice",
+                    choices: ["ภาวะเงินเฟ้อและโอกาสในการนำเงินไปสร้างผลตอบแทน", "การเปลี่ยนแปลงของอัตราภาษีเงินได้", "นโยบายของสถาบันการเงิน", "การพิมพ์ธนบัตรเพิ่มของธนาคารกลาง"],
+                    ansIndex: 0,
+                    exp: "เกิดจากเงินเฟ้อ (อำนาจซื้อลดลง) และค่าเสียโอกาสในการนำเงินไปลงทุนต่อ"
+                }
+            ],
+            npv: [
+                {
+                    q: "ข้อที่ 1: โครงการลงทุน 50,000 บาท กระแสเงินสดรับ PV รวมทั้งสิ้น 52,500 บาท เกณฑ์ NPV สรุปว่าอย่างไร?",
+                    type: "choice",
+                    choices: ["ยอมรับโครงการ (เพราะ NPV > 0)", "ปฏิเสธโครงการ (เพราะ NPV < 0)", "ไม่สามารถตัดสินใจได้", "เลื่อนการลงทุน"],
+                    ansIndex: 0,
+                    exp: "NPV = 52,500 - 50,000 = +2,500 บาท (เป็นบวก จึงควรยอมรับโครงการ)"
+                },
+                {
+                    q: "ข้อที่ 2: โครงการหนึ่งใช้เงินลงทุนเริ่มแรก 100,000 บาท รวมมูลค่าปัจจุบันของกระแสเงินสดรับเท่ากับ 93,000 บาท ค่า NPV มีค่าเท่าใด?",
+                    type: "input",
+                    ans: -7000,
+                    exp: "NPV = PV รับ - เงินลงทุน = 93,000 - 100,000 = -7,000 บาท"
+                },
+                {
+                    q: "ข้อที่ 3: หากโครงการประเมินค่า NPV ได้เท่ากับ 0 พอดี แสดงว่าโครงการนี้ให้ผลตอบแทนเป็นอย่างไร?",
+                    type: "choice",
+                    choices: ["ขาดทุนอย่างแน่นอน", "ให้ผลตอบแทนเท่ากับอัตราผลตอบแทนขั้นต่ำที่ต้องการพอดี", "ให้กำไรมหาศาล", "ไม่คุ้มค่ากับการลงทุน"],
+                    ansIndex: 1,
+                    exp: "NPV = 0 หมายถึงโครงการให้ผลตอบแทนเท่ากับต้นทุนทางการเงินหรืออัตราที่คาดหวังพอดี"
+                },
+                {
+                    q: "ข้อที่ 4: ลงทุนซื้อเครื่องจักร 80,000 บาท PV กระแสเงินสดรับปีที่ 1=40,000 บาท, ปีที่ 2=50,000 บาท ค่า NPV สุทธิคือเท่าใด?",
+                    type: "input",
+                    ans: 10000,
+                    exp: "รวม PV = 40,000 + 50,000 = 90,000 บาท | NPV = 90,000 - 80,000 = +10,000 บาท"
+                },
+                {
+                    q: "ข้อที่ 5: หากต้องเลือกระหว่าง 2 โครงการที่เป็นอิสระต่อกัน (Independent Projects) โดยโครงการ A มี NPV = 15,000 บาท และโครงการ B มี NPV = 25,000 บาท ควรตัดสินใจอย่างไร?",
+                    type: "choice",
+                    choices: ["เลือกเฉพาะโครงการ B เท่านั้น", "ยอมรับได้ทั้ง 2 โครงการเพราะ NPV เป็นบวกทั้งคู่", "ปฏิเสธทั้งสองโครงการ", "เลือกโครงการ A เพราะใช้เงินน้อยกว่า"],
+                    ansIndex: 1,
+                    exp: "ถ้าโครงการเป็นอิสระต่อกัน (ไม่จำกัดงบ) สามารถยอมรับโครงการใดก็ได้ที่มี NPV เป็นบวก"
+                }
+            ],
+            irr: [
+                {
+                    q: "ข้อที่ 1: โครงการคำนวณ IRR ได้ 15% ขณะที่ต้นทุนเงินทุนของกิจการ (k) เท่ากับ 11% ควรตัดสินใจอย่างไร?",
+                    type: "choice",
+                    choices: ["ยอมรับโครงการ เพราะ IRR > k", "ปฏิเสธโครงการ เพราะ IRR > k", "ชะลอโครงการ", "ไม่สามารถประเมินได้"],
+                    ansIndex: 0,
+                    exp: "เกณฑ์ IRR: หาก IRR สูงกว่าต้นทุนเงินทุน (k) แสดงว่าสร้างกำไรส่วนเกิน จึงยอมรับโครงการ"
+                },
+                {
+                    q: "ข้อที่ 2: ค่าอัตราผลตอบแทนภายใน (IRR) คืออัตราคิดลดที่ทำให้ค่าของ NPV มีค่าเท่ากับเท่าใด?",
+                    type: "choice",
+                    choices: ["มีค่าเท่ากับ 1", "มีค่าเท่ากับ 0", "มีค่าเป็นอนันต์", "มีค่าติดลบ"],
+                    ansIndex: 1,
+                    exp: "ตามนิยาม IRR คืออัตราคิดลดที่ทำให้ มูลค่าปัจจุบันสุทธิ (NPV) เท่ากับศูนย์"
+                },
+                {
+                    q: "ข้อที่ 3: หากกิจการมีต้นทุนทางการเงิน 12% แต่โครงการให้ค่า IRR เพียง 9.5% โครงการนี้ควรดำเนินการหรือไม่?",
+                    type: "choice",
+                    choices: ["ควรทำ เพราะอัตราผลตอบแทนยังเป็นบวก", "ไม่ควรทำ เพราะผลตอบแทนต่ำกว่าต้นทุนเงินทุน (IRR < k)", "ควรทำและกู้เงินเพิ่ม", "ทำได้โดยปรับอัตราคิดลด"],
+                    ansIndex: 1,
+                    exp: "IRR (9.5%) ต่ำกว่าต้นทุนเงินทุน (12%) จะทำให้มูลค่ากิจการลดลง จึงไม่ควรลงทุน"
+                },
+                {
+                    q: "ข้อที่ 4: การหาค่า IRR หากกระแสเงินสดแต่ละปีไม่เท่ากันและมีหลายปี มักใช้วิธีการใดในการคำนวณ?",
+                    type: "choice",
+                    choices: ["วิธีบัญญัติไตรยางศ์", "วิธีประมาณการลองผิดลองถูก (Trial and Error) หรือการแก้สมการพหุนาม", "สูตรดอกเบี้ยคงต้น", "การเทียบบัญชีแยกประเภท"],
+                    ansIndex: 1,
+                    exp: "IRR หลายปีจะแก้ยาก ต้องใช้วิธี Trial and Error, Interpolation หรืออัลกอริทึมคอมพิวเตอร์"
+                },
+                {
+                    q: "ข้อที่ 5: หากโครงการ A มี IRR 18% และโครงการ B มี IRR 14% โดยต้นทุนเงินทุนเท่ากับ 10% หากต้องเลือกเพียงโครงการเดียว (Mutually Exclusive) ควรเลือกโครงการใด?",
+                    type: "choice",
+                    choices: ["เลือกโครงการ A", "เลือกโครงการ B", "เลือกทั้งสองโครงการ", "ไม่เลือกทั้งสองโครงการ"],
+                    ansIndex: 0,
+                    exp: "โครงการ A ให้อัตราผลตอบแทนภายในสูงกว่า และทั้งคู่สูงกว่าต้นทุนเงินทุน จึงเลือก A"
+                }
+            ]
+        };
+
+        const quizState = {
+            interest: { index: 0, answers: {} },
+            tvm: { index: 0, answers: {} },
+            npv: { index: 0, answers: {} },
+            irr: { index: 0, answers: {} }
+        };
+
+        // Navigation Tabs
+        function switchModule(mod) {
+            currentModule = mod;
+            document.querySelectorAll('.module-block').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`module-${mod}`).classList.remove('hidden');
+
+            document.querySelectorAll('.mod-tab').forEach(el => {
+                el.classList.remove('bg-blue-700', 'text-white', 'shadow-sm');
+                el.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            });
+            const activeBtn = document.getElementById(`btn-tab-${mod}`);
+            activeBtn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            activeBtn.classList.add('bg-blue-700', 'text-white', 'shadow-sm');
+
+            switchMode(currentSubMode);
+        }
+
+        function switchMode(mode) {
+            currentSubMode = mode;
+            const calcBtn = document.getElementById('subtab-calc');
+            const quizBtn = document.getElementById('subtab-quiz');
+
+            if (mode === 'calc') {
+                calcBtn.className = "w-1/2 py-2 rounded-lg bg-white text-blue-700 shadow-sm transition-all";
+                quizBtn.className = "w-1/2 py-2 rounded-lg text-slate-600 transition-all";
+                document.getElementById(`${currentModule}-calc`).classList.remove('hidden');
+                document.getElementById(`${currentModule}-quiz`).classList.add('hidden');
+            } else {
+                quizBtn.className = "w-1/2 py-2 rounded-lg bg-white text-blue-700 shadow-sm transition-all";
+                calcBtn.className = "w-1/2 py-2 rounded-lg text-slate-600 transition-all";
+                document.getElementById(`${currentModule}-calc`).classList.add('hidden');
+                document.getElementById(`${currentModule}-quiz`).classList.remove('hidden');
+                loadQuizQuestion(currentModule);
+            }
+        }
+
+        // ================= Quiz Engine =================
+        function loadQuizQuestion(mod) {
+            const state = quizState[mod];
+            const qData = questionBank[mod][state.index];
+
+            document.getElementById(`quiz-${mod}-progress`).innerText = `ข้อที่ ${state.index + 1}/5`;
+            document.getElementById(`quiz-${mod}-question`).innerHTML = qData.q;
+            
+            const interactiveBox = document.getElementById(`quiz-${mod}-interactive`);
+            const feedbackBox = document.getElementById(`quiz-${mod}-feedback`);
+            feedbackBox.classList.add('hidden');
+            interactiveBox.innerHTML = '';
+
+            if (qData.type === 'input') {
+                interactiveBox.innerHTML = `
+                    <div class="flex space-x-2">
+                        <input type="number" id="input-ans-${mod}" placeholder="ระบุตัวเลขคำตอบ" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                        <button onclick="checkAnswer('${mod}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold whitespace-nowrap">ส่งคำตอบ</button>
+                    </div>
+                `;
+            } else if (qData.type === 'choice') {
+                let html = '<div class="space-y-2">';
+                qData.choices.forEach((choice, idx) => {
+                    html += `
+                        <button onclick="checkChoiceAnswer('${mod}', ${idx})" class="w-full p-2.5 text-left border rounded-lg text-xs font-medium hover:bg-blue-50 border-slate-200 transition-colors">
+                            ${String.fromCharCode(65 + idx)}. ${choice}
+                        </button>
+                    `;
+                });
+                html += '</div>';
+                interactiveBox.innerHTML = html;
+            }
+
+            // Update Score counter
+            let score = 0;
+            for (let i = 0; i < 5; i++) {
+                if (state.answers[i] === true) score++;
+            }
+            document.getElementById(`quiz-${mod}-score`).innerText = `คะแนน: ${score}/5`;
+        }
+
+        function checkAnswer(mod) {
+            const state = quizState[mod];
+            const qData = questionBank[mod][state.index];
+            const userAns = parseFloat(document.getElementById(`input-ans-${mod}`).value);
+            const feedback = document.getElementById(`quiz-${mod}-feedback`);
+            feedback.classList.remove('hidden');
+
+            if (Math.abs(userAns - qData.ans) < 5) {
+                feedback.className = "p-3 rounded-lg text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-300";
+                feedback.innerHTML = `🎉 <strong>ถูกต้อง!</strong> ${qData.exp}`;
+                state.answers[state.index] = true;
+            } else {
+                feedback.className = "p-3 rounded-lg text-xs font-medium bg-rose-100 text-rose-800 border border-rose-300";
+                feedback.innerHTML = `❌ <strong>ยังไม่ถูกต้อง</strong> ${qData.exp}`;
+                state.answers[state.index] = false;
+            }
+
+            let score = 0;
+            for (let i = 0; i < 5; i++) {
+                if (state.answers[i] === true) score++;
+            }
+            document.getElementById(`quiz-${mod}-score`).innerText = `คะแนน: ${score}/5`;
+        }
+
+        function checkChoiceAnswer(mod, selectedIdx) {
+            const state = quizState[mod];
+            const qData = questionBank[mod][state.index];
+            const feedback = document.getElementById(`quiz-${mod}-feedback`);
+            feedback.classList.remove('hidden');
+
+            if (selectedIdx === qData.ansIndex) {
+                feedback.className = "p-3 rounded-lg text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-300";
+                feedback.innerHTML = `🎉 <strong>ถูกต้องยอดเยี่ยม!</strong> ${qData.exp}`;
+                state.answers[state.index] = true;
+            } else {
+                feedback.className = "p-3 rounded-lg text-xs font-medium bg-rose-100 text-rose-800 border border-rose-300";
+                feedback.innerHTML = `❌ <strong>ยังไม่ถูกต้อง</strong> ${qData.exp}`;
+                state.answers[state.index] = false;
+            }
+
+            let score = 0;
+            for (let i = 0; i < 5; i++) {
+                if (state.answers[i] === true) score++;
+            }
+            document.getElementById(`quiz-${mod}-score`).innerText = `คะแนน: ${score}/5`;
+        }
+
+        function nextQuestion(mod) {
+            if (quizState[mod].index < 4) {
+                quizState[mod].index++;
+                loadQuizQuestion(mod);
+            } else {
+                alert('คุณทำแบบฝึกหัดครบทั้ง 5 ข้อในหมวดนี้แล้ว!');
+            }
+        }
+
+        function prevQuestion(mod) {
+            if (quizState[mod].index > 0) {
+                quizState[mod].index--;
+                loadQuizQuestion(mod);
+            }
+        }
+
+        // ================= Module 1 Functions =================
+        function calculateInterest() {
+            const type = document.getElementById('interest-type').value;
+            const P = parseFloat(document.getElementById('int-p').value);
+            const r = parseFloat(document.getElementById('int-r').value) / 100;
+            const t = parseFloat(document.getElementById('int-t').value);
+
+            if (isNaN(P) || isNaN(r) || isNaN(t)) {
+                alert('กรุณากรอกข้อมูลตัวเลขให้ครบถ้วน');
+                return;
+            }
+
+            const resDiv = document.getElementById('interest-result');
+            const title = document.getElementById('int-res-title');
+            const steps = document.getElementById('int-res-steps');
+            const total = document.getElementById('int-res-total');
+
+            resDiv.classList.remove('hidden');
+
+            if (type === 'simple') {
+                const I = P * r * t;
+                const A = P + I;
+                title.innerText = "ผลการคำนวณดอกเบี้ยเชิงเดียว";
+                steps.innerHTML = `
+                    สูตร: I = P × r × t <br>
+                    แทนค่า: I = ${P.toLocaleString()} × ${(r*100)}% × ${t} ปี <br>
+                    ดอกเบี้ยรับ (I) = ${I.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท <br>
+                    เงินรวม (A = P + I) = ${P.toLocaleString()} + ${I.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท
+                `;
+                total.innerText = `${A.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท`;
+            } else {
+                const A = P * Math.pow((1 + r), t);
+                const I = A - P;
+                title.innerText = "ผลการคำนวณดอกเบี้ยทบต้น (รายปี)";
+                steps.innerHTML = `
+                    สูตร: FV = PV × (1 + r)ⁿ <br>
+                    แทนค่า: FV = ${P.toLocaleString()} × (1 + ${r})<sup>${t}</sup> <br>
+                    เงินต้น: ${P.toLocaleString()} บาท <br>
+                    ดอกเบี้ยสะสม: ${I.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท
+                `;
+                total.innerText = `${A.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท`;
+            }
+        }
+
+        // ================= Module 2 Functions =================
+        function toggleTVMInputs() {
+            const target = document.getElementById('tvm-target').value;
+            if (target === 'pv') {
+                document.getElementById('tvm-input-fv-block').classList.remove('hidden');
+                document.getElementById('tvm-input-pv-block').classList.add('hidden');
+            } else {
+                document.getElementById('tvm-input-fv-block').classList.add('hidden');
+                document.getElementById('tvm-input-pv-block').classList.remove('hidden');
+            }
+        }
+
+        function calculateTVM() {
+            const target = document.getElementById('tvm-target').value;
+            const r = parseFloat(document.getElementById('tvm-r').value) / 100;
+            const n = parseFloat(document.getElementById('tvm-n').value);
+
+            const resDiv = document.getElementById('tvm-result');
+            const title = document.getElementById('tvm-res-title');
+            const steps = document.getElementById('tvm-res-steps');
+            const label = document.getElementById('tvm-res-label');
+            const val = document.getElementById('tvm-res-value');
+
+            resDiv.classList.remove('hidden');
+
+            if (target === 'pv') {
+                const FV = parseFloat(document.getElementById('tvm-fv').value);
+                if (isNaN(FV) || isNaN(r) || isNaN(n)) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
+                const PV = FV / Math.pow((1 + r), n);
+                title.innerText = "ผลการคำนวณหามูลค่าปัจจุบัน (PV)";
+                steps.innerHTML = `สูตร: PV = FV ÷ (1 + r)ⁿ <br>แทนค่า: PV = ${FV.toLocaleString()} ÷ (1 + ${r})<sup>${n}</sup>`;
+                label.innerText = "มูลค่าปัจจุบัน (PV):";
+                val.innerText = `${PV.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท`;
+            } else {
+                const PV = parseFloat(document.getElementById('tvm-pv').value);
+                if (isNaN(PV) || isNaN(r) || isNaN(n)) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
+                const FV = PV * Math.pow((1 + r), n);
+                title.innerText = "ผลการคำนวณหามูลค่าอนาคต (FV)";
+                steps.innerHTML = `สูตร: FV = PV × (1 + r)ⁿ <br>แทนค่า: FV = ${PV.toLocaleString()} × (1 + ${r})<sup>${n}</sup>`;
+                label.innerText = "มูลค่าอนาคต (FV):";
+                val.innerText = `${FV.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท`;
+            }
+        }
+
+        // ================= Module 3 Functions (NPV 10 Years) =================
+        function calculateNPV() {
+            const cf0 = parseFloat(document.getElementById('npv-cf0').value);
+            const k = parseFloat(document.getElementById('npv-k').value) / 100;
+
+            if (isNaN(cf0) || isNaN(k)) {
+                alert('กรุณากรอกเงินลงทุนเริ่มแรกและอัตราคิดลด');
+                return;
+            }
+
+            let totalPV = 0;
+            let stepHtml = '';
+
+            for (let year = 1; year <= 10; year++) {
+                const val = parseFloat(document.getElementById(`npv-cf-${year}`).value);
+                if (!isNaN(val) && val !== 0) {
+                    const pv_year = val / Math.pow((1 + k), year);
+                    totalPV += pv_year;
+                    stepHtml += `ปีที่ ${year}: ${val.toLocaleString()} ÷ (1+${k})<sup>${year}</sup> = ${pv_year.toLocaleString(undefined, {maximumFractionDigits: 2})} บ.<br>`;
+                }
+            }
+
+            const npv = totalPV - cf0;
+            const resDiv = document.getElementById('npv-result');
+            const valSpan = document.getElementById('npv-res-value');
+            const stepsDiv = document.getElementById('npv-res-steps');
+            const decisionDiv = document.getElementById('npv-res-decision');
+
+            resDiv.classList.remove('hidden');
+            stepsDiv.innerHTML = stepHtml || 'ไม่มีกระแสเงินสดรับที่ระบุ';
+            valSpan.innerText = `${npv.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท`;
+
+            if (npv >= 0) {
+                resDiv.className = "mt-4 p-4 rounded-xl space-y-2 text-sm bg-emerald-50 border border-emerald-200 text-emerald-950";
+                decisionDiv.className = "p-2 rounded font-semibold text-xs text-center bg-emerald-600 text-white";
+                decisionDiv.innerText = "ผลประเมิน: ควรยอมรับโครงการ (NPV ≥ 0)";
+            } else {
+                resDiv.className = "mt-4 p-4 rounded-xl space-y-2 text-sm bg-rose-50 border border-rose-200 text-rose-950";
+                decisionDiv.className = "p-2 rounded font-semibold text-xs text-center bg-rose-600 text-white";
+                decisionDiv.innerText = "ผลประเมิน: ควรปฏิเสธโครงการ (NPV < 0)";
+            }
+        }
+
+        // ================= Module 4 Functions (IRR 10 Years - Newton Raphson) =================
+        function calculateIRR() {
+            const cf0 = parseFloat(document.getElementById('irr-cf0').value);
+            if (isNaN(cf0) || cf0 <= 0) {
+                alert('กรุณากรอกเงินลงทุนเริ่มแรกให้ถูกต้อง');
+                return;
+            }
+
+            const cfs = [-cf0];
+            let hasPositiveFlow = false;
+
+            for (let year = 1; year <= 10; year++) {
+                const val = parseFloat(document.getElementById(`irr-cf-${year}`).value) || 0;
+                cfs.push(val);
+                if (val > 0) hasPositiveFlow = true;
+            }
+
+            if (!hasPositiveFlow) {
+                alert('กรุณากรอกเงินสดรับรายปีอย่างน้อย 1 ปี');
+                return;
+            }
+
+            // Newton-Raphson Solver for IRR
+            let rate = 0.1; // initial guess 10%
+            const maxIteration = 1000;
+            const precision = 1e-7;
+
+            for (let iter = 0; iter < maxIteration; iter++) {
+                let npv = 0;
+                let dnpv = 0;
+
+                for (let t = 0; t < cfs.length; t++) {
+                    npv += cfs[t] / Math.pow(1 + rate, t);
+                    if (t > 0) {
+                        dnpv -= (t * cfs[t]) / Math.pow(1 + rate, t + 1);
+                    }
+                }
+
+                if (Math.abs(npv) < precision) break;
+                if (Math.abs(dnpv) < precision) break;
+
+                const newRate = rate - (npv / dnpv);
+                if (Math.abs(newRate - rate) < precision) {
+                    rate = newRate;
+                    break;
+                }
+                rate = newRate;
+            }
+
+            const irrResultDiv = document.getElementById('irr-result');
+            const irrValueSpan = document.getElementById('irr-res-value');
+            irrResultDiv.classList.remove('hidden');
+
+            if (isNaN(rate) || !isFinite(rate)) {
+                irrValueSpan.innerText = "ไม่สามารถคำนวณได้";
+            } else {
+                irrValueSpan.innerText = `${(rate * 100).toFixed(2)} %`;
+            }
+        }
+
+        // Initialize First Module
+        window.onload = function() {
+            switchModule('interest');
+        };
+    </script>
+</body>
+</html>
